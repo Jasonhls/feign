@@ -86,6 +86,9 @@ final class SynchronousMethodHandler implements MethodHandler {
     Retryer retryer = this.retryer.clone();
     while (true) {
       try {
+        /**
+         * feign请求的核心方法，执行Http请求
+         */
         return executeAndDecode(template, options);
       } catch (RetryableException e) {
         try {
@@ -107,6 +110,9 @@ final class SynchronousMethodHandler implements MethodHandler {
   }
 
   Object executeAndDecode(RequestTemplate template, Options options) throws Throwable {
+    /**
+     * 遍历执行Feign的拦截器RequestInterceptor对象的apply方法
+     */
     Request request = targetRequest(template);
 
     if (logLevel != Logger.Level.NONE) {
@@ -116,6 +122,9 @@ final class SynchronousMethodHandler implements MethodHandler {
     Response response;
     long start = System.nanoTime();
     try {
+      /**
+       * 发送http请求，如果是HystrixFeign，那么这里的client为LoadBalancerFeignClient
+       */
       response = client.execute(request, options);
       // ensure the request is set. TODO: remove in Feign 12
       response = response.toBuilder()

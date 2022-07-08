@@ -106,6 +106,9 @@ final class HystrixInvocationHandler implements InvocationHandler {
           @Override
           protected Object run() throws Exception {
             try {
+              /**
+               * 这里根据方法，获取对象的MethodHandler，这里的MethodHandler为SynchronousMethodHandler对象
+               */
               return HystrixInvocationHandler.this.dispatch.get(method).invoke(args);
             } catch (Exception e) {
               throw e;

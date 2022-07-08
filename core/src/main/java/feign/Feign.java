@@ -287,7 +287,16 @@ public abstract class Feign {
       return target(new HardCodedTarget<T>(apiType, url));
     }
 
+    /**
+     * @EnableFeignClient注解，使用的是HytrixFeign，在创建feign的代理对象的时候，会走下面创建代理类的方法
+     * @param target
+     * @param <T>
+     * @return
+     */
     public <T> T target(Target<T> target) {
+      /**
+       * 如果当前对象是HystrixFeign，会走HystrixFeign的build方法
+       */
       return build().newInstance(target);
     }
 
@@ -302,16 +311,26 @@ public abstract class Feign {
       Options options = Capability.enrich(this.options, capabilities);
       Encoder encoder = Capability.enrich(this.encoder, capabilities);
       Decoder decoder = Capability.enrich(this.decoder, capabilities);
+      /**
+       * 如果是HystrixFeign，执行它的build方法的时候，会创建InvocationHandlerFactory对象，并赋值给父类Feign的属性invocationHandlerFactory
+       */
       InvocationHandlerFactory invocationHandlerFactory =
           Capability.enrich(this.invocationHandlerFactory, capabilities);
       QueryMapEncoder queryMapEncoder = Capability.enrich(this.queryMapEncoder, capabilities);
 
+      /**
+       * 这里把client传给了SynchronousMethodHandler的属性client
+       */
       SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
           new SynchronousMethodHandler.Factory(client, retryer, requestInterceptors, logger,
               logLevel, dismiss404, closeAfterDecode, propagationPolicy, forceDecoding);
       ParseHandlersByName handlersByName =
           new ParseHandlersByName(contract, options, encoder, decoder, queryMapEncoder,
               errorDecoder, synchronousMethodHandlerFactory);
+      /**
+       * handlersByName的属性factory为SynchronousMethodHandler，把handlersByName赋值给ReflectiveFeign的属性targetToHandlersByName
+       * 把invocationHandlerFactory赋值给ReflectiveFeign的属性factory
+       */
       return new ReflectiveFeign(handlersByName, invocationHandlerFactory, queryMapEncoder);
     }
   }

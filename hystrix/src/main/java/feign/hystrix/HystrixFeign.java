@@ -139,6 +139,9 @@ public final class HystrixFeign {
 
     /** Configures components needed for hystrix integration. */
     Feign build(final FallbackFactory<?> nullableFallbackFactory) {
+      /**
+       * 创建InvocationHandlerFactory对象并赋值给父类的Feign.Builder的属性invocationHandlerFactory
+       */
       super.invocationHandlerFactory(new InvocationHandlerFactory() {
         @Override
         public InvocationHandler create(Target target,
@@ -148,6 +151,7 @@ public final class HystrixFeign {
         }
       });
       super.contract(new HystrixDelegatingContract(contract));
+      //执行父类即Feign的build方法
       return super.build();
     }
 

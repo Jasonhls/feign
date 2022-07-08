@@ -61,6 +61,10 @@ public class ReflectiveFeign extends Feign {
         methodToHandler.put(method, nameToHandler.get(Feign.configKey(target.type(), method)));
       }
     }
+    /**
+     * 这里的factory通过ReflectiveFeign的构造方法传进来的，即HystrixFeign的build方法中创建的InvocationHandlerFactory，
+     * 然后这里执行它的create方法，把methodHandler传给InvocationHandlerFactory的属性dispatch
+     */
     InvocationHandler handler = factory.create(target, methodToHandler);
     T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(),
         new Class<?>[] {target.type()}, handler);
@@ -165,6 +169,11 @@ public class ReflectiveFeign extends Feign {
             throw new IllegalStateException(md.configKey() + " is not a method handled by feign");
           });
         } else {
+          /**
+           *这里的md.configKey()返回的格式为：类简称 + # + 方法名 + 入参对象名
+           * 比如：SalesOrderFacade#checkSalesOrderNo(SalesOrderNoCheckRequest)
+           * factory.create返回的是SynchronousMethodHandler对象
+           */
           result.put(md.configKey(),
               factory.create(target, md, buildTemplate, options, decoder, errorDecoder));
         }

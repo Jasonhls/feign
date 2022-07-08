@@ -154,6 +154,7 @@ public interface Client {
 
     HttpURLConnection convertAndSend(Request request, Options options) throws IOException {
       final URL url = new URL(request.url());
+      //这里的connection是sun.net.www.protocol.http.HttpURLConnection
       final HttpURLConnection connection = this.getConnection(url);
       if (connection instanceof HttpsURLConnection) {
         HttpsURLConnection sslCon = (HttpsURLConnection) connection;
@@ -196,6 +197,9 @@ public interface Client {
         connection.addRequestProperty("Accept", "*/*");
       }
 
+      /**
+       * 这里会判断是否有body，如果有body，在下面的connection.getOutputStream()方法中get请求会变成post请求
+       */
       if (request.body() != null) {
         if (disableRequestBuffering) {
           if (contentLength != null) {
@@ -205,6 +209,10 @@ public interface Client {
           }
         }
         connection.setDoOutput(true);
+        /**
+         * 执行sun.net.www.protocol.http.HttpURLConnection类的getOutputStream()方法，会调用到该类的getOutputStream0()方法，
+         * 该方法会将get请求变成post请求
+         */
         OutputStream out = connection.getOutputStream();
         if (gzipEncodedRequest) {
           out = new GZIPOutputStream(out);
